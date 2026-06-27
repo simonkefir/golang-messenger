@@ -1,24 +1,59 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gin-gonic/gin"
+	"context"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
+	users_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/users/repository/postgres"
+	users_service "github.com/simonkefir/golang-messenger/internal/feature/users/service"
+	users_transport_http "github.com/simonkefir/golang-messenger/internal/feature/users/transport/http"
 )
 
 func main() {
-	fmt.Println("hello world!")
-	r := gin.Default()
+	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("db open: %v", err)
+	}
+	defer db.Close()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	if err := db.Ping(); err != nil {
+		log.Fatalf("db ping: %v", err)
+	}
 
-	if err := r.Run(); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+	userRepo := users_repository_postgres.NewUserRepository(db)
+	userService := users_service.NewUsersService(userRepo)
+	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
+
+	v1 := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
+	v1.RegisterRoutes(userHandler.Routes()...)
+
+	cfg, err := core_http_server.NewConfig()
+	if err != nil {
+		log.Fatalf("config: %v", err)
+	}
+
+	srv := core_http_server.NewHTTPServer(cfg)
+	srv.RegisterAPIRouters(v1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-quit
+		cancel()
+	}()
+
+	if err := srv.Run(ctx); err != nil {
+		log.Fatalf("server: %v", err)
 	}
 }

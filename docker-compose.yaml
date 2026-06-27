@@ -14,16 +14,19 @@ services:
     restart: always
 
   messenger-postgres-migrate:
-    image: migrate/migrate:v4.19.1
-    env_file:
-      - .env
-    volumes:
-      - ${PWD}/migrations:/migrations
-    command:
-      - "-path"
-      - "/migrations"
-      - "-database"
-      - "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@messenger-postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      image: migrate/migrate:v4.19.1
+      env_file:
+        - .env
+      volumes:
+        - ${PWD}/migrations:/migrations
+      command:
+        - "-path"
+        - "/migrations"
+        - "-database"
+        - "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@messenger-postgres:5432/${POSTGRES_DB}?sslmode=disable"
+        - "up"
+      depends_on:
+        - messenger-postgres
 
   port-forwarder:
     image: alpine/socat:1.8.0.3
