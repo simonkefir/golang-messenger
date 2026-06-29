@@ -12,6 +12,11 @@ type CreateUserDTO struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
+type LoginUserDTO struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
+}
+
 type UserDTOResponse struct {
 	ID        int64     `json:"id"`
 	Username  string    `json:"username"`

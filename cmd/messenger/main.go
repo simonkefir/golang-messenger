@@ -6,37 +6,69 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"context"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	core_logger "github.com/simonkefir/golang-messenger/internal/core/logger"
+	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
 	users_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/users/repository/postgres"
 	users_service "github.com/simonkefir/golang-messenger/internal/feature/users/service"
 	users_transport_http "github.com/simonkefir/golang-messenger/internal/feature/users/transport/http"
+	"go.uber.org/zap"
 )
 
 func main() {
+	if os.Getenv("JWT_SECRET") == "" {
+		log.Fatal("JWT_SECRET is not set")
+	}
+	if os.Getenv("JWT_TTL") == "" {
+		log.Fatal("JWT_TTL is not set")
+	}
+	_, err := time.ParseDuration(os.Getenv("JWT_TTL"))
+	if err != nil {
+		log.Fatal("Invalid JWL_TTL in .env")
+	}
+
+	logCfg, err := core_logger.NewConfig()
+	if err != nil {
+		log.Fatalf("logger config: %v", err)
+	}
+
+	logger, err := core_logger.NewLogger(logCfg)
+	if err != nil {
+		log.Fatalf("logger: %v", err)
+	}
+	defer logger.Close()
+
 	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalf("db open: %v", err)
+		logger.Fatal("db open", zap.Error(err))
 	}
 	defer db.Close()
 
 	if err := db.Ping(); err != nil {
-		log.Fatalf("db ping: %v", err)
+		logger.Fatal("db ping", zap.Error(err))
 	}
 
 	userRepo := users_repository_postgres.NewUserRepository(db)
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
 
-	v1 := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
+	v1 := core_http_server.NewAPIVersionRouter(
+		core_http_server.ApiVersion1,
+		core_http_middleware.RequestID(),
+		core_http_middleware.Logger(logger),
+		core_http_middleware.Trace(),
+		core_http_middleware.Panic(),
+	)
 	v1.RegisterRoutes(userHandler.Routes()...)
 
 	cfg, err := core_http_server.NewConfig()
 	if err != nil {
-		log.Fatalf("config: %v", err)
+		logger.Fatal("server config", zap.Error(err))
 	}
 
 	srv := core_http_server.NewHTTPServer(cfg)
@@ -50,10 +82,11 @@ func main() {
 
 	go func() {
 		<-quit
+		logger.Info("shutting down...")
 		cancel()
 	}()
 
 	if err := srv.Run(ctx); err != nil {
-		log.Fatalf("server: %v", err)
+		logger.Fatal("server", zap.Error(err))
 	}
 }

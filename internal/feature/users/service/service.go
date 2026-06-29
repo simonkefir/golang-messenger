@@ -7,18 +7,22 @@ import (
 )
 
 type UsersService struct {
-	usersRepository UsersRepository
+	usersRepository usersRepository
 }
 
-type UsersRepository interface {
+type usersRepository interface {
 	CreateUser(
 		ctx context.Context,
 		user domain.User,
 	) (domain.User, error)
+	GetUserByEmail(
+		ctx context.Context,
+		email string,
+	) (domain.User, error)
 }
 
 func NewUsersService(
-	usersRepository UsersRepository,
+	usersRepository usersRepository,
 ) *UsersService {
 	return &UsersService{
 		usersRepository: usersRepository,

@@ -11,7 +11,15 @@ import (
 )
 
 type UsersService interface {
-	CreateUser(ctx context.Context, user domain.User) (domain.User, error)
+	CreateUser(
+		ctx context.Context,
+		user domain.User,
+	) (domain.User, error)
+	Login(
+		ctx context.Context,
+		email string,
+		password string,
+	) (string, error)
 }
 
 type UsersHTTPHandler struct {
@@ -32,6 +40,11 @@ func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
 			Method:  http.MethodPost,
 			Path:    "/users/register",
 			Handler: h.CreateUser,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/users/login",
+			Handler: h.Login,
 		},
 	}
 }
