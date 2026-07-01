@@ -19,6 +19,20 @@ type usersRepository interface {
 		ctx context.Context,
 		email string,
 	) (domain.User, error)
+	GetUserByID(
+		ctx context.Context,
+		userID int64,
+	) (domain.User, error)
+	PatchMe(
+		ctx context.Context,
+		userID int64,
+		username *string,
+		password *string,
+	) (domain.User, error)
+	DeleteMe(
+		ctx context.Context,
+		userID int64,
+	) error
 }
 
 func NewUsersService(

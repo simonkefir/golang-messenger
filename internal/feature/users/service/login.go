@@ -28,8 +28,4 @@ func (s *UsersService) Login(ctx context.Context, email, password string) (strin
 	}
 
 	return token, nil
-	// 1. находим юзера по email
-	// 2. bcrypt.CompareHashAndPassword
-	// 3. генерируем JWT
-	// 4. возвращаем токен
 }

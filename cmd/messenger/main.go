@@ -20,17 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const minJWTSecretLength = 32
+
 func main() {
-	if os.Getenv("JWT_SECRET") == "" {
-		log.Fatal("JWT_SECRET is not set")
-	}
-	if os.Getenv("JWT_TTL") == "" {
-		log.Fatal("JWT_TTL is not set")
-	}
-	_, err := time.ParseDuration(os.Getenv("JWT_TTL"))
-	if err != nil {
-		log.Fatal("Invalid JWL_TTL in .env")
-	}
+	setTimezone()
+	validateJWTEnv()
 
 	logCfg, err := core_logger.NewConfig()
 	if err != nil {
@@ -88,5 +82,34 @@ func main() {
 
 	if err := srv.Run(ctx); err != nil {
 		logger.Fatal("server", zap.Error(err))
+	}
+}
+
+func setTimezone() {
+	tz := os.Getenv("TZ")
+	if tz == "" {
+		return
+	}
+
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		log.Fatalf("invalid TZ: %v", err)
+	}
+	time.Local = loc
+}
+
+func validateJWTEnv() {
+	secret := os.Getenv("JWT_SECRET")
+	if len(secret) < minJWTSecretLength {
+		log.Fatalf("JWT_SECRET must be at least %d characters, got %d", minJWTSecretLength, len(secret))
+	}
+
+	ttl := os.Getenv("JWT_TTL")
+	if ttl == "" {
+		log.Fatal("JWT_TTL is not set")
+	}
+
+	if _, err := time.ParseDuration(ttl); err != nil {
+		log.Fatalf("invalid JWT_TTL: %v", err)
 	}
 }
