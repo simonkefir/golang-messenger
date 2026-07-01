@@ -59,4 +59,4 @@ messenger-run:
 
 
 ps:
-	@docker ps
+	@docker compose ps

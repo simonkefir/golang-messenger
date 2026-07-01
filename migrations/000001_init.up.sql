@@ -5,12 +5,12 @@ CREATE TABLE messenger.users (
     username VARCHAR(40) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW ()
+    created_at TIMESTAMPTZ DEFAULT NOW ()
 );
 
 CREATE TABLE messenger.chats (
     id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE messenger.chats_participants (
@@ -26,5 +26,5 @@ CREATE TABLE messenger.messages (
     version BIGINT NOT NULL DEFAULT 1,
     message TEXT NOT NULL,
     is_delivered BOOLEAN NOT NULL DEFAULT FALSE,
-    sent_at TIMESTAMP DEFAULT NOW()
+    sent_at TIMESTAMPTZ DEFAULT NOW()
 );
