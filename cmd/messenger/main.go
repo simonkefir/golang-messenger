@@ -14,6 +14,9 @@ import (
 	core_logger "github.com/simonkefir/golang-messenger/internal/core/logger"
 	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
+	chats_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/chats/repository/postgres"
+	chats_service "github.com/simonkefir/golang-messenger/internal/feature/chats/service"
+	chats_transport_http "github.com/simonkefir/golang-messenger/internal/feature/chats/transport/http"
 	users_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/users/repository/postgres"
 	users_service "github.com/simonkefir/golang-messenger/internal/feature/users/service"
 	users_transport_http "github.com/simonkefir/golang-messenger/internal/feature/users/transport/http"
@@ -47,6 +50,10 @@ func main() {
 		logger.Fatal("db ping", zap.Error(err))
 	}
 
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
 	userRepo := users_repository_postgres.NewUserRepository(db)
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
@@ -59,6 +66,12 @@ func main() {
 		core_http_middleware.Panic(),
 	)
 	v1.RegisterRoutes(userHandler.Routes()...)
+
+	chatRepo := chats_repository_postgres.NewChatRepository(db)
+	chatService := chats_service.NewChatsService(chatRepo)
+	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService)
+
+	v1.RegisterRoutes(chatHandler.Routes()...)
 
 	cfg, err := core_http_server.NewConfig()
 	if err != nil {
