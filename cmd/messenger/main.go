@@ -17,6 +17,9 @@ import (
 	chats_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/chats/repository/postgres"
 	chats_service "github.com/simonkefir/golang-messenger/internal/feature/chats/service"
 	chats_transport_http "github.com/simonkefir/golang-messenger/internal/feature/chats/transport/http"
+	messages_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/messages/repository/postgres"
+	messages_service "github.com/simonkefir/golang-messenger/internal/feature/messages/service"
+	messages_transport_http "github.com/simonkefir/golang-messenger/internal/feature/messages/transport/http"
 	users_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/users/repository/postgres"
 	users_service "github.com/simonkefir/golang-messenger/internal/feature/users/service"
 	users_transport_http "github.com/simonkefir/golang-messenger/internal/feature/users/transport/http"
@@ -58,6 +61,14 @@ func main() {
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
 
+	chatRepo := chats_repository_postgres.NewChatRepository(db)
+	chatService := chats_service.NewChatsService(chatRepo)
+	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService)
+
+	msgRepo := messages_repository_postgres.NewMessagesRepository(db)
+	msgService := messages_service.NewMessagesService(msgRepo)
+	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService)
+
 	v1 := core_http_server.NewAPIVersionRouter(
 		core_http_server.ApiVersion1,
 		core_http_middleware.RequestID(),
@@ -67,11 +78,9 @@ func main() {
 	)
 	v1.RegisterRoutes(userHandler.Routes()...)
 
-	chatRepo := chats_repository_postgres.NewChatRepository(db)
-	chatService := chats_service.NewChatsService(chatRepo)
-	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService)
-
 	v1.RegisterRoutes(chatHandler.Routes()...)
+
+	v1.RegisterRoutes(msgHandler.Routes()...)
 
 	cfg, err := core_http_server.NewConfig()
 	if err != nil {
