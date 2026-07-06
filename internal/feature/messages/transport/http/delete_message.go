@@ -13,7 +13,7 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
-func (h *MessagesHTTPHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
+func (h *MessagesHTTPHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
 	userID, ok := core_http_middleware.GetUserID(r.Context())
@@ -29,7 +29,7 @@ func (h *MessagesHTTPHandler) CreateMessage(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var dto CreateMessageDTO
+	var dto DeleteMessageDTO
 
 	if err := core_http_request.DecodeJSON(r, &dto); err != nil {
 		responseHandler.ErrorResponse(core_errors.ErrInvalidInput, "invalid json")
@@ -48,11 +48,10 @@ func (h *MessagesHTTPHandler) CreateMessage(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	msg, err := h.svc.CreateMessage(r.Context(), userID, chatID, dto.Content)
-	if err != nil {
-		responseHandler.ErrorResponse(err, "failed to create message")
+	if err := h.svc.DeleteMessage(r.Context(), userID, chatID, dto.ID); err != nil {
+		responseHandler.ErrorResponse(err, "failed to delete message")
 		return
 	}
 
-	responseHandler.JSONResponse(NewMessageResponseFromDomain(msg), http.StatusCreated)
+	responseHandler.NoContentResponse()
 }

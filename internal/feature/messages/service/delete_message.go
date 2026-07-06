@@ -1,0 +1,24 @@
+package messages_service
+
+import (
+	"context"
+	"fmt"
+
+	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
+)
+
+func (s *MessagesService) DeleteMessage(ctx context.Context, senderID int64, chatID int64, messageID int64) error {
+	ok, err := s.chatsChecker.IsParticipant(ctx, chatID, senderID)
+	if err != nil {
+		return fmt.Errorf("check participant: %w", err)
+	}
+	if !ok {
+		return core_errors.ErrForbidden
+	}
+
+	if err := s.messagesRepository.DeleteMessage(ctx, chatID, messageID); err != nil {
+		return fmt.Errorf("delete message: %w", err)
+	}
+
+	return nil
+}

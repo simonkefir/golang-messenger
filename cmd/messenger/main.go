@@ -65,8 +65,8 @@ func main() {
 	chatService := chats_service.NewChatsService(chatRepo)
 	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService)
 
-	msgRepo := messages_repository_postgres.NewMessagesRepository(db)
-	msgService := messages_service.NewMessagesService(msgRepo)
+	msgRepo := messages_repository_postgres.NewMsgRepository(db)
+	msgService := messages_service.NewMessagesService(msgRepo, chatRepo)
 	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService)
 
 	v1 := core_http_server.NewAPIVersionRouter(

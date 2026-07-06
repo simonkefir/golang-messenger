@@ -14,8 +14,21 @@ import (
 type MessagesService interface {
 	CreateMessage(
 		ctx context.Context,
-		msg domain.Message,
+		userID int64,
+		chatID int64,
+		content string,
 	) (domain.Message, error)
+	GetMessages(
+		ctx context.Context,
+		userID int64,
+		chatID int64,
+	) ([]domain.Message, error)
+	DeleteMessage(
+		ctx context.Context,
+		userID int64,
+		chatID int64,
+		messageID int64,
+	) error
 }
 
 type MessagesHTTPHandler struct {
@@ -36,6 +49,18 @@ func (h *MessagesHTTPHandler) Routes() []core_http_server.Route {
 			Method:     http.MethodPost,
 			Path:       "/chats/{chat_id}/messages",
 			Handler:    h.CreateMessage,
+			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
+		},
+		{
+			Method:     http.MethodGet,
+			Path:       "/chats/{chat_id}/messages",
+			Handler:    h.GetMessages,
+			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
+		},
+		{
+			Method:     http.MethodDelete,
+			Path:       "/chats/{chat_id}/messages",
+			Handler:    h.DeleteMessage,
 			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
 		},
 	}

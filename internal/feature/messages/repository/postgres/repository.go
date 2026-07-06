@@ -9,7 +9,7 @@ type MsgRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) *MsgRepository {
+func NewMsgRepository(db *sql.DB) *MsgRepository {
 	return &MsgRepository{
 		db: db,
 	}
