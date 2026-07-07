@@ -9,19 +9,3 @@ type User struct {
 	PasswordHash string
 	CreatedAt    time.Time
 }
-
-func NewUser(
-	id int64,
-	username string,
-	email string,
-	password_hash string,
-	created_at time.Time,
-) User {
-	return User{
-		ID:           id,
-		Username:     username,
-		Email:        email,
-		PasswordHash: password_hash,
-		CreatedAt:    created_at,
-	}
-}
