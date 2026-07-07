@@ -29,6 +29,13 @@ type MessagesService interface {
 		chatID int64,
 		messageID int64,
 	) error
+	PatchMessage(
+		ctx context.Context,
+		userID int64,
+		chatID int64,
+		messageID int64,
+		content string,
+	) (domain.Message, error)
 }
 
 type MessagesHTTPHandler struct {
@@ -61,6 +68,12 @@ func (h *MessagesHTTPHandler) Routes() []core_http_server.Route {
 			Method:     http.MethodDelete,
 			Path:       "/chats/{chat_id}/messages",
 			Handler:    h.DeleteMessage,
+			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
+		},
+		{
+			Method:     http.MethodPatch,
+			Path:       "/chats/{chat_id}/messages",
+			Handler:    h.PatchMessage,
 			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
 		},
 	}

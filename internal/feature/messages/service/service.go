@@ -27,6 +27,12 @@ type messagesRepository interface {
 		chatID int64,
 		messageID int64,
 	) error
+	PatchMessage(
+		ctx context.Context,
+		chatID int64,
+		messageID int64,
+		content string,
+	) (domain.Message, error)
 }
 
 type chatsChecker interface {

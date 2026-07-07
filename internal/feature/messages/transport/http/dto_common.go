@@ -10,6 +10,11 @@ type DeleteMessageDTO struct {
 	ID int64 `json:"id" validate:"required,min=1"`
 }
 
+type PatchMessageDTO struct {
+	ID      int64  `json:"id" validate:"required,min=1"`
+	Content string `json:"content" validate:"required,min=1,max=4000"`
+}
+
 type MessageDTOResponse struct {
 	ID       int64  `json:"id"`
 	ChatID   int64  `json:"chat_id"`

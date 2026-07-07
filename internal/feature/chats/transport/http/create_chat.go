@@ -45,5 +45,5 @@ func (h *ChatsHTTPHandler) CreateChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseHandler.JSONResponse(chat, http.StatusCreated)
+	responseHandler.JSONResponse(NewChatCreatedResponseFromDomain(chat), http.StatusCreated)
 }

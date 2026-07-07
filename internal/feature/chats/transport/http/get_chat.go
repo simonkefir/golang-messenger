@@ -33,6 +33,5 @@ func (h *ChatsHTTPHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// маппим domain → DTO с json тегами
 	responseHandler.JSONResponse(NewChatResponseFromDomain(chat), http.StatusOK)
 }
