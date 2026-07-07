@@ -9,6 +9,7 @@ import (
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
 	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 )
 
 type MessagesService interface {
@@ -41,12 +42,14 @@ type MessagesService interface {
 type MessagesHTTPHandler struct {
 	svc      MessagesService
 	validate *validator.Validate
+	hub      *core_websocket.Hub
 }
 
-func NewMessagesHTTPHandler(svc MessagesService) *MessagesHTTPHandler {
+func NewMessagesHTTPHandler(svc MessagesService, hub *core_websocket.Hub) *MessagesHTTPHandler {
 	return &MessagesHTTPHandler{
 		svc:      svc,
 		validate: validator.New(),
+		hub:      hub,
 	}
 }
 
@@ -75,6 +78,11 @@ func (h *MessagesHTTPHandler) Routes() []core_http_server.Route {
 			Path:       "/chats/{chat_id}/messages",
 			Handler:    h.PatchMessage,
 			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/ws",
+			Handler: h.HandleWS,
 		},
 	}
 }

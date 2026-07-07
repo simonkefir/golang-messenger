@@ -1,4 +1,4 @@
-package jwt
+package core_jwt
 
 import (
 	"errors"

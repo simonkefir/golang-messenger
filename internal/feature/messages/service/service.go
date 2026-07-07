@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 )
 
 type MessagesService struct {
 	messagesRepository messagesRepository
 	chatsChecker       chatsChecker
+	hub                *core_websocket.Hub
 }
 
 type messagesRepository interface {
@@ -41,14 +43,20 @@ type chatsChecker interface {
 		chatID int64,
 		userID int64,
 	) (bool, error)
+	GetChatParticipants(
+		ctx context.Context,
+		chatID int64,
+	) ([]domain.ChatParticipant, error)
 }
 
 func NewMessagesService(
 	messagesRepository messagesRepository,
 	chatsChecker chatsChecker,
+	hub *core_websocket.Hub,
 ) *MessagesService {
 	return &MessagesService{
 		messagesRepository: messagesRepository,
 		chatsChecker:       chatsChecker,
+		hub:                hub,
 	}
 }

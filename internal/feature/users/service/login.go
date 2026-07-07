@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
-	"github.com/simonkefir/golang-messenger/internal/core/jwt"
+	core_jwt "github.com/simonkefir/golang-messenger/internal/core/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,7 +22,7 @@ func (s *UsersService) Login(ctx context.Context, email, password string) (strin
 		return "", core_errors.ErrInvalidInput
 	}
 
-	token, err := jwt.GenerateToken(user.ID)
+	token, err := core_jwt.GenerateToken(user.ID)
 	if err != nil {
 		return "", fmt.Errorf("generate token: %w", err)
 	}

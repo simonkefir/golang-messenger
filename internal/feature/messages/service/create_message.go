@@ -2,6 +2,7 @@ package messages_service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
@@ -20,6 +21,16 @@ func (s *MessagesService) CreateMessage(ctx context.Context, senderID int64, cha
 	msg, err := s.messagesRepository.CreateMessage(ctx, senderID, chatID, content)
 	if err != nil {
 		return domain.Message{}, fmt.Errorf("create message: %w", err)
+	}
+
+	participants, err := s.chatsChecker.GetChatParticipants(ctx, chatID)
+	if err == nil {
+		payload, _ := json.Marshal(msg)
+		for _, p := range participants {
+			if p.UserID != senderID {
+				s.hub.SendToUser(p.UserID, payload)
+			}
+		}
 	}
 
 	return msg, nil

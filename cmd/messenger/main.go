@@ -14,6 +14,7 @@ import (
 	core_logger "github.com/simonkefir/golang-messenger/internal/core/logger"
 	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 	chats_repository_postgres "github.com/simonkefir/golang-messenger/internal/feature/chats/repository/postgres"
 	chats_service "github.com/simonkefir/golang-messenger/internal/feature/chats/service"
 	chats_transport_http "github.com/simonkefir/golang-messenger/internal/feature/chats/transport/http"
@@ -57,6 +58,8 @@ func main() {
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
+	hub := core_websocket.NewHub()
+
 	userRepo := users_repository_postgres.NewUserRepository(db)
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
@@ -66,8 +69,8 @@ func main() {
 	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService)
 
 	msgRepo := messages_repository_postgres.NewMsgRepository(db)
-	msgService := messages_service.NewMessagesService(msgRepo, chatRepo)
-	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService)
+	msgService := messages_service.NewMessagesService(msgRepo, chatRepo, hub)
+	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService, hub)
 
 	v1 := core_http_server.NewAPIVersionRouter(
 		core_http_server.ApiVersion1,
