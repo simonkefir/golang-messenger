@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/simonkefir/golang-messenger/internal/core/jwt"
+	core_jwt "github.com/simonkefir/golang-messenger/internal/core/jwt"
 )
 
 type contextKey string
@@ -39,7 +39,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		tokenStr := parts[1]
 
-		userID, err := jwt.ValidateToken(tokenStr)
+		userID, err := core_jwt.ValidateToken(tokenStr)
 		if err != nil {
 			http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnauthorized)
 			return

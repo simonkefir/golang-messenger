@@ -8,6 +8,7 @@ import (
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
 	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 )
 
 type ChatsService interface {
@@ -33,14 +34,16 @@ type ChatsService interface {
 }
 
 type ChatsHTTPHandler struct {
-	svc      ChatsService
-	validate *validator.Validate
+	svc       ChatsService
+	validate  *validator.Validate
+	publisher core_websocket.EventPublisher
 }
 
-func NewChatsHTTPHandler(svc ChatsService) *ChatsHTTPHandler {
+func NewChatsHTTPHandler(svc ChatsService, publisher core_websocket.EventPublisher) *ChatsHTTPHandler {
 	return &ChatsHTTPHandler{
-		svc:      svc,
-		validate: validator.New(),
+		svc:       svc,
+		validate:  validator.New(),
+		publisher: publisher,
 	}
 }
 
