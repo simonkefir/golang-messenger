@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 )
 
 type ChatsService struct {
 	chatsRepository chatsRepository
+	publisher       core_websocket.EventPublisher
 }
 
 type chatsRepository interface {
@@ -46,8 +48,10 @@ type chatsRepository interface {
 
 func NewChatsService(
 	chatsRepository chatsRepository,
+	publisher core_websocket.EventPublisher,
 ) *ChatsService {
 	return &ChatsService{
 		chatsRepository: chatsRepository,
+		publisher:       publisher,
 	}
 }

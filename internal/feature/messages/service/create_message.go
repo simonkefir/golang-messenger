@@ -2,11 +2,11 @@ package messages_service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
 	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 )
 
 func (s *MessagesService) CreateMessage(ctx context.Context, senderID int64, chatID int64, content string) (domain.Message, error) {
@@ -25,10 +25,12 @@ func (s *MessagesService) CreateMessage(ctx context.Context, senderID int64, cha
 
 	participants, err := s.chatsChecker.GetChatParticipants(ctx, chatID)
 	if err == nil {
-		payload, _ := json.Marshal(msg)
 		for _, p := range participants {
 			if p.UserID != senderID {
-				s.hub.SendToUser(p.UserID, payload)
+				s.publisher.Publish(p.UserID, core_websocket.Event{
+					Type: core_websocket.EventMessageCreated,
+					Data: msg,
+				})
 			}
 		}
 	}

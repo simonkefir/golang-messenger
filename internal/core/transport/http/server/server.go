@@ -48,12 +48,9 @@ func (s *HTTPServer) Run(ctx context.Context) error {
 	ch := make(chan error, 1)
 
 	go func() {
-		defer close(ch)
-
 		log.Printf("starting HTTP server on %s", s.config.Addr)
 
-		err := server.ListenAndServe()
-		if !errors.Is(err, http.ErrServerClosed) {
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			ch <- err
 		}
 	}()

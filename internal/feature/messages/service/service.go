@@ -10,7 +10,7 @@ import (
 type MessagesService struct {
 	messagesRepository messagesRepository
 	chatsChecker       chatsChecker
-	hub                *core_websocket.Hub
+	publisher          core_websocket.EventPublisher
 }
 
 type messagesRepository interface {
@@ -52,11 +52,11 @@ type chatsChecker interface {
 func NewMessagesService(
 	messagesRepository messagesRepository,
 	chatsChecker chatsChecker,
-	hub *core_websocket.Hub,
+	publisher core_websocket.EventPublisher,
 ) *MessagesService {
 	return &MessagesService{
 		messagesRepository: messagesRepository,
 		chatsChecker:       chatsChecker,
-		hub:                hub,
+		publisher:          publisher,
 	}
 }

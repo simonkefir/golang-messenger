@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
+	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
 )
 
 func (s *MessagesService) DeleteMessage(ctx context.Context, senderID int64, chatID int64, messageID int64) error {
@@ -18,6 +19,19 @@ func (s *MessagesService) DeleteMessage(ctx context.Context, senderID int64, cha
 
 	if err := s.messagesRepository.DeleteMessage(ctx, chatID, messageID); err != nil {
 		return fmt.Errorf("delete message: %w", err)
+	}
+
+	participants, err := s.chatsChecker.GetChatParticipants(ctx, chatID)
+	if err == nil {
+		for _, p := range participants {
+			s.publisher.Publish(p.UserID, core_websocket.Event{
+				Type: core_websocket.EventMessageDeleted,
+				Data: map[string]int64{
+					"chat_id":    chatID,
+					"message_id": messageID,
+				},
+			})
+		}
 	}
 
 	return nil

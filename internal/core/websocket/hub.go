@@ -1,6 +1,7 @@
 package core_websocket
 
 import (
+	"encoding/json"
 	"sync"
 )
 
@@ -13,6 +14,19 @@ func NewHub() *Hub {
 	return &Hub{
 		connections: make(map[int64][]*Client),
 	}
+}
+
+func (h *Hub) Shutdown() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	for _, clients := range h.connections {
+		for _, client := range clients {
+			close(client.Send)
+		}
+	}
+
+	h.connections = make(map[int64][]*Client)
 }
 
 func (h *Hub) Register(client *Client) {
@@ -42,13 +56,18 @@ func (h *Hub) Unregister(client *Client) {
 	close(client.Send)
 }
 
-func (h *Hub) SendToUser(userID int64, message []byte) {
+func (h *Hub) SendEventToUser(userID int64, event Event) {
+	payload, err := json.Marshal(event)
+	if err != nil {
+		return
+	}
+
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
 	for _, client := range h.connections[userID] {
 		select {
-		case client.Send <- message:
+		case client.Send <- payload:
 		default:
 		}
 	}

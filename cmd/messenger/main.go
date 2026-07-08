@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -59,18 +60,20 @@ func main() {
 	db.SetConnMaxLifetime(5 * time.Minute)
 
 	hub := core_websocket.NewHub()
+	publisher := core_websocket.NewWSPublisher(hub)
+	wsHandler := core_websocket.NewHandler(hub)
 
 	userRepo := users_repository_postgres.NewUserRepository(db)
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
 
 	chatRepo := chats_repository_postgres.NewChatRepository(db)
-	chatService := chats_service.NewChatsService(chatRepo)
-	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService)
+	chatService := chats_service.NewChatsService(chatRepo, publisher)
+	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService, publisher)
 
 	msgRepo := messages_repository_postgres.NewMsgRepository(db)
-	msgService := messages_service.NewMessagesService(msgRepo, chatRepo, hub)
-	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService, hub)
+	msgService := messages_service.NewMessagesService(msgRepo, chatRepo, publisher)
+	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService, publisher)
 
 	v1 := core_http_server.NewAPIVersionRouter(
 		core_http_server.ApiVersion1,
@@ -84,6 +87,12 @@ func main() {
 	v1.RegisterRoutes(chatHandler.Routes()...)
 
 	v1.RegisterRoutes(msgHandler.Routes()...)
+
+	v1.RegisterRoutes(core_http_server.Route{
+		Method:  http.MethodGet,
+		Path:    "/ws",
+		Handler: wsHandler.HandleConnection,
+	})
 
 	cfg, err := core_http_server.NewConfig()
 	if err != nil {
@@ -108,6 +117,8 @@ func main() {
 	if err := srv.Run(ctx); err != nil {
 		logger.Fatal("server", zap.Error(err))
 	}
+
+	hub.Shutdown()
 }
 
 func setTimezone() {

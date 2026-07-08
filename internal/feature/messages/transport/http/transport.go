@@ -40,16 +40,16 @@ type MessagesService interface {
 }
 
 type MessagesHTTPHandler struct {
-	svc      MessagesService
-	validate *validator.Validate
-	hub      *core_websocket.Hub
+	svc       MessagesService
+	validate  *validator.Validate
+	publisher core_websocket.EventPublisher
 }
 
-func NewMessagesHTTPHandler(svc MessagesService, hub *core_websocket.Hub) *MessagesHTTPHandler {
+func NewMessagesHTTPHandler(svc MessagesService, publisher core_websocket.EventPublisher) *MessagesHTTPHandler {
 	return &MessagesHTTPHandler{
-		svc:      svc,
-		validate: validator.New(),
-		hub:      hub,
+		svc:       svc,
+		validate:  validator.New(),
+		publisher: publisher,
 	}
 }
 
@@ -78,11 +78,6 @@ func (h *MessagesHTTPHandler) Routes() []core_http_server.Route {
 			Path:       "/chats/{chat_id}/messages",
 			Handler:    h.PatchMessage,
 			Middleware: []core_http_middleware.Middleware{core_http_middleware.JWTMiddleware},
-		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/ws",
-			Handler: h.HandleWS,
 		},
 	}
 }
