@@ -57,6 +57,13 @@ migrate-action:
 messenger-run:
 	@go run ${PROJECT_ROOT}/cmd/messenger/main.go
 
+swagger-gen:
+	@docker compose run --rm swagger \
+		init \
+		-g cmd/messenger/main.go \
+		-o docs \
+		--parseInternal \
+		--parseDependency \
 
 ps:
 	@docker compose ps

@@ -1,0 +1,275 @@
+basePath: /api/v1
+definitions:
+  github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  internal_feature_users_transport_http.CreateUserDTO:
+    properties:
+      email:
+        example: alex@mail.com
+        type: string
+      password:
+        example: wasd1234
+        minLength: 8
+        type: string
+      username:
+        example: alex
+        maxLength: 40
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  internal_feature_users_transport_http.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImV4cCI6NDEwMjQ0NDgwMH0.c36q-l2h78e5VqZQ3tZPbMZXZupO4g3M8hnudYMbdOE
+        type: string
+    type: object
+  internal_feature_users_transport_http.LoginUserDTO:
+    properties:
+      email:
+        example: alex@mail.com
+        type: string
+      password:
+        example: wasd1234
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_feature_users_transport_http.PatchUserDTO:
+    properties:
+      password:
+        example: wasd1212
+        minLength: 8
+        type: string
+      username:
+        example: alexg
+        maxLength: 40
+        minLength: 3
+        type: string
+    type: object
+  internal_feature_users_transport_http.UserDTOResponse:
+    properties:
+      created_at:
+        example: "2006-01-02 15:04:05"
+        type: string
+      email:
+        example: alex@mail.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      username:
+        example: alex
+        type: string
+    type: object
+host: 127.0.0.1:8080
+info:
+  contact: {}
+  description: Todo Application REST-API scheme
+  title: Golang Messenger API
+  version: "1.0"
+paths:
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получить пользователя в системе по ID
+      parameters:
+      - description: ID получаемого пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно полученный пользователь
+          schema:
+            $ref: '#/definitions/internal_feature_users_transport_http.UserDTOResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      summary: Получить пользователя
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Получить JWT-токен для авторизации себя
+      parameters:
+      - description: LoginUser тело запроса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_feature_users_transport_http.LoginUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная аутентификация. Возращает JWT-токен
+          schema:
+            $ref: '#/definitions/internal_feature_users_transport_http.LoginResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      summary: Залогиниться
+      tags:
+      - users
+  /users/me:
+    delete:
+      description: Удаление себя в системе пользователей
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Успешное удаление
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление своего пользователя
+      tags:
+      - users
+    get:
+      description: Получить информацию о себе из системы пользователей
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно полученный пользователь
+          schema:
+            $ref: '#/definitions/internal_feature_users_transport_http.UserDTOResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить себя
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Изменить своего пользователя в системе
+      parameters:
+      - description: PatchMe тело запроса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_feature_users_transport_http.PatchUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно изменённый пользователь
+          schema:
+            $ref: '#/definitions/internal_feature_users_transport_http.UserDTOResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Изменить себя
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Создать нового пользователя в системе
+      parameters:
+      - description: CreateUser тело запроса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_feature_users_transport_http.CreateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешно созданный пользователь
+          schema:
+            $ref: '#/definitions/internal_feature_users_transport_http.UserDTOResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      summary: Создать пользователя
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: Используйте "Bearer <ваш JWT-токен>"
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
