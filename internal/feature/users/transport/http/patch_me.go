@@ -12,10 +12,23 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// PatchMe      godoc
+// @Summary     Изменить себя
+// @Description Изменить своего пользователя в системе
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       request body PatchUserDTO true "PatchMe тело запроса"
+// @Security    BearerAuth
+// @Success     200 {object} UserDTOResponse "Успешно изменённый пользователь"
+// @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /users/me [patch]
 func (h *UsersHTTPHandler) PatchMe(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
-	var dto PatchUserDto
+	var dto PatchUserDTO
 
 	if err := core_http_request.DecodeJSON(r, &dto); err != nil {
 		responseHandler.ErrorResponse(err, "invalid json")

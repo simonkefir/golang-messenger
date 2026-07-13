@@ -11,7 +11,7 @@ type ParticipantDTO struct {
 	Username string `json:"username"`
 }
 
-type ChatResponseDTO struct {
+type ChatDTOResponse struct {
 	ID           int64            `json:"id"`
 	CreatedAt    string           `json:"created_at"`
 	Participants []ParticipantDTO `json:"participants"`
@@ -36,7 +36,7 @@ func NewChatCreatedResponseFromDomain(chat domain.Chat) *ChatCreatedResponseDTO 
 	}
 }
 
-func NewChatResponseFromDomain(chat domain.ChatWithParticipants) *ChatResponseDTO {
+func NewChatResponseFromDomain(chat domain.ChatWithParticipants) *ChatDTOResponse {
 	participants := make([]ParticipantDTO, 0, len(chat.Participants))
 	for _, p := range chat.Participants {
 		participants = append(participants, ParticipantDTO{
@@ -45,7 +45,7 @@ func NewChatResponseFromDomain(chat domain.ChatWithParticipants) *ChatResponseDT
 		})
 	}
 
-	return &ChatResponseDTO{
+	return &ChatDTOResponse{
 		ID:           chat.ID,
 		CreatedAt:    chat.CreatedAt.Format("2006-01-02 15:04:05"),
 		Participants: participants,

@@ -11,6 +11,18 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// Login        godoc
+// @Summary     Залогиниться
+// @Description Получить JWT-токен для авторизации себя
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       request body LoginUserDTO true "LoginUser тело запроса".
+// @Success     200 {object} LoginResponse "Успешная аутентификация. Возращает JWT-токен"
+// @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /users/login [post]
 func (h *UsersHTTPHandler) Login(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
@@ -35,11 +47,9 @@ func (h *UsersHTTPHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.svc.Login(r.Context(), dto.Email, dto.Password)
 	if err != nil {
-		responseHandler.ErrorResponse(core_errors.ErrUnauthorized, "failed to give jwt token")
+		responseHandler.ErrorResponse(core_errors.ErrUnauthorized, "failed to login")
 		return
 	}
 
-	responseHandler.JSONResponse(map[string]string{
-		"token": token,
-	}, http.StatusOK)
+	responseHandler.JSONResponse(LoginResponse{Token: token}, http.StatusOK)
 }

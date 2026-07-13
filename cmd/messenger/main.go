@@ -12,6 +12,7 @@ import (
 	"context"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/simonkefir/golang-messenger/docs"
 	core_logger "github.com/simonkefir/golang-messenger/internal/core/logger"
 	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
@@ -30,6 +31,15 @@ import (
 
 const minJWTSecretLength = 32
 
+// @title        Golang Messenger API
+// @version      1.0
+// @description  Messenger REST-API scheme
+// @host         127.0.0.1:8080
+// @BasePath     /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name         Authorization
+// @description  Используйте "Bearer <ваш JWT-токен>"
 func main() {
 	setTimezone()
 	validateJWTEnv()
@@ -45,6 +55,8 @@ func main() {
 	}
 	defer logger.Close()
 
+	logger.Debug("application time zone", zap.Any("zone", time.Local))
+
 	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		logger.Fatal("db open", zap.Error(err))
@@ -59,24 +71,29 @@ func main() {
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	hub := core_websocket.NewHub()
+	hub := core_websocket.NewHub(logger)
 	publisher := core_websocket.NewWSPublisher(hub)
 	wsHandler := core_websocket.NewHandler(hub)
 
+	logger.Debug("initializing feature", zap.String("feature", "users"))
 	userRepo := users_repository_postgres.NewUserRepository(db)
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
 
+	logger.Debug("initializing feature", zap.String("feature", "chats"))
 	chatRepo := chats_repository_postgres.NewChatRepository(db)
 	chatService := chats_service.NewChatsService(chatRepo, publisher)
 	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService, publisher)
 
+	logger.Debug("initializing feature", zap.String("feature", "messages"))
 	msgRepo := messages_repository_postgres.NewMsgRepository(db)
 	msgService := messages_service.NewMessagesService(msgRepo, chatRepo, publisher)
 	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService, publisher)
 
+	logger.Debug("initializing HTTP server")
 	v1 := core_http_server.NewAPIVersionRouter(
 		core_http_server.ApiVersion1,
+		core_http_middleware.CORS(),
 		core_http_middleware.RequestID(),
 		core_http_middleware.Logger(logger),
 		core_http_middleware.Trace(),
@@ -101,6 +118,7 @@ func main() {
 
 	srv := core_http_server.NewHTTPServer(cfg)
 	srv.RegisterAPIRouters(v1)
+	srv.RegisterSwagger()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

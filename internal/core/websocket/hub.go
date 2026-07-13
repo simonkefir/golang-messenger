@@ -3,16 +3,21 @@ package core_websocket
 import (
 	"encoding/json"
 	"sync"
+
+	core_logger "github.com/simonkefir/golang-messenger/internal/core/logger"
+	"go.uber.org/zap"
 )
 
 type Hub struct {
 	mu          sync.RWMutex
 	connections map[int64][]*Client
+	logger      *core_logger.Logger
 }
 
-func NewHub() *Hub {
+func NewHub(logger *core_logger.Logger) *Hub {
 	return &Hub{
 		connections: make(map[int64][]*Client),
+		logger:      logger,
 	}
 }
 
@@ -59,6 +64,7 @@ func (h *Hub) Unregister(client *Client) {
 func (h *Hub) SendEventToUser(userID int64, event Event) {
 	payload, err := json.Marshal(event)
 	if err != nil {
+		h.logger.Warn("websocket marshal error", zap.Error(err))
 		return
 	}
 

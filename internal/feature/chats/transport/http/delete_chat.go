@@ -10,6 +10,18 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// DeleteChat   godoc
+// @Summary     Удаление чата
+// @Description Удаление чата по его ID в системе чатов
+// @Tags        chats
+// @Security    BearerAuth
+// @Success     204                                           "Успешно удалённый чат"
+// @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure     403 {object} core_http_response.ErrorResponse "Forbidden"
+// @Failure     404 {object} core_http_response.ErrorResponse "Not found"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /chats/{chat_id}                              [delete]
 func (h *ChatsHTTPHandler) DeleteChat(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)

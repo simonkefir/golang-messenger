@@ -9,6 +9,18 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// GetChat      godoc
+// @Summary     Получить чаты
+// @Description Получить информацию об о всех своих чатах из системы чатов
+// @Tags        chats
+// @Produce     json
+// @Security    BearerAuth
+// @Success     200 {object} ChatListItemDTO                  "Успешно полученные чаты"
+// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure     403 {object} core_http_response.ErrorResponse "Forbidden"
+// @Failure     404 {object} core_http_response.ErrorResponse "Not found"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /chats                                        [get]
 func (h *ChatsHTTPHandler) GetChats(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)

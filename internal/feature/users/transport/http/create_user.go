@@ -12,6 +12,17 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// CreateUser   godoc
+// @Summary     Создать пользователя
+// @Description Создать нового пользователя в системе
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       request body CreateUserDTO true "CreateUser тело запроса"
+// @Success     201 {object} UserDTOResponse "Успешно созданный пользователь"
+// @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /users/register [post]
 func (h *UsersHTTPHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
