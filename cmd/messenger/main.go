@@ -33,13 +33,13 @@ const minJWTSecretLength = 32
 
 // @title        Golang Messenger API
 // @version      1.0
-// @description  Todo Application REST-API scheme
+// @description  Messenger REST-API scheme
 // @host         127.0.0.1:8080
 // @BasePath     /api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
-// @name Authorization
-// @description Используйте "Bearer <ваш JWT-токен>"
+// @name         Authorization
+// @description  Используйте "Bearer <ваш JWT-токен>"
 func main() {
 	setTimezone()
 	validateJWTEnv()
@@ -71,7 +71,7 @@ func main() {
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
 
-	hub := core_websocket.NewHub()
+	hub := core_websocket.NewHub(logger)
 	publisher := core_websocket.NewWSPublisher(hub)
 	wsHandler := core_websocket.NewHandler(hub)
 
@@ -93,6 +93,7 @@ func main() {
 	logger.Debug("initializing HTTP server")
 	v1 := core_http_server.NewAPIVersionRouter(
 		core_http_server.ApiVersion1,
+		core_http_middleware.CORS(),
 		core_http_middleware.RequestID(),
 		core_http_middleware.Logger(logger),
 		core_http_middleware.Trace(),

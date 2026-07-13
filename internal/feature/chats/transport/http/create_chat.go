@@ -12,6 +12,20 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// CreateChat   godoc
+// @Summary     Создать чат
+// @Description Создать чат с участием другого пользователя
+// @Tags        chats
+// @Accept      json
+// @Produce     json
+// @Param       request body CreateChatDTO       true         "CreateChat тело запроса"
+// @Security    BearerAuth
+// @Success     201 {object} ChatDTOResponse                  "Успешно созданный чат"
+// @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
+// @Failure     404 {object} core_http_response.ErrorResponse "Not found"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /chats                                        [post]
 func (h *ChatsHTTPHandler) CreateChat(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)

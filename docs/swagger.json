@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Todo Application REST-API scheme",
+        "description": "Messenger REST-API scheme",
         "title": "Golang Messenger API",
         "contact": {},
         "version": "1.0"
@@ -9,6 +9,445 @@
     "host": "127.0.0.1:8080",
     "basePath": "/api/v1",
     "paths": {
+        "/chats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получить информацию об о всех своих чатах из системы чатов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Получить чаты",
+                "responses": {
+                    "200": {
+                        "description": "Успешно полученные чаты",
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatDTOResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создать чат с участием другого пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Создать чат",
+                "parameters": [
+                    {
+                        "description": "CreateChat тело запроса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_chats_transport_http.CreateChatDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Успешно созданный чат",
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatDTOResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/{chat_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получить информацию о своём чате из системы чатов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Получить чат",
+                "responses": {
+                    "200": {
+                        "description": "Успешно полученный чат",
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatDTOResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаление чата по его ID в системе чатов",
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Удаление чата",
+                "responses": {
+                    "204": {
+                        "description": "Успешно удалённый чат"
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/chats/{chat_id}/messages": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получить сообщения из чата по его ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Получить сообщения из чата",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно полученные сообщения",
+                        "schema": {
+                            "type": "MessageDTOResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создать новое сообщение в чате по ID чата",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Отправить сообщение",
+                "parameters": [
+                    {
+                        "description": "CreateMessage тело запроса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_messages_transport_http.CreateMessageDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Успешно созданное сообщение",
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_messages_transport_http.MessageDTOResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаление сообщения по ID чата и ID сообщения",
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Удаление сообщения в чате",
+                "responses": {
+                    "204": {
+                        "description": "Успешное удаление сообщения в чате"
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Изменить сообщение в чате по ID чата и ID сообщения",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Изменить сообщение",
+                "parameters": [
+                    {
+                        "description": "PatchMessage тело запроса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_messages_transport_http.PatchMessageDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно изменённое сообщение",
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_messages_transport_http.MessageDTOResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/login": {
             "post": {
                 "description": "Получить JWT-токен для авторизации себя",
@@ -110,9 +549,6 @@
                     }
                 ],
                 "description": "Удаление себя в системе пользователей",
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "users"
                 ],
@@ -309,6 +745,96 @@
                 },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_feature_chats_transport_http.ChatDTOResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_feature_chats_transport_http.ParticipantDTO"
+                    }
+                }
+            }
+        },
+        "internal_feature_chats_transport_http.CreateChatDTO": {
+            "type": "object",
+            "required": [
+                "participant_id"
+            ],
+            "properties": {
+                "participant_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_feature_chats_transport_http.ParticipantDTO": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_feature_messages_transport_http.CreateMessageDTO": {
+            "type": "object",
+            "required": [
+                "content"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "minLength": 1
+                }
+            }
+        },
+        "internal_feature_messages_transport_http.MessageDTOResponse": {
+            "type": "object",
+            "properties": {
+                "chat_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "sender_id": {
+                    "type": "integer"
+                },
+                "sent_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_feature_messages_transport_http.PatchMessageDTO": {
+            "type": "object",
+            "required": [
+                "content",
+                "id"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "minLength": 1
+                },
+                "id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

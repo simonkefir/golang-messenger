@@ -13,6 +13,19 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// CreateMessage   godoc
+// @Summary        Отправить сообщение
+// @Description    Создать новое сообщение в чате по ID чата
+// @Tags           messages
+// @Accept         json
+// @Produce        json
+// @Param          request body     CreateMessageDTO     true        "CreateMessage тело запроса"
+// @Security       BearerAuth
+// @Success        201     {object} MessageDTOResponse               "Успешно созданное сообщение"
+// @Failure        400     {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure        403     {object} core_http_response.ErrorResponse "Forbidden"
+// @Failure        500     {object} core_http_response.ErrorResponse "Internal server error"
+// @Router         /chats/{chat_id}/messages                         [post]
 func (h *MessagesHTTPHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)

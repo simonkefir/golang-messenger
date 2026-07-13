@@ -21,8 +21,8 @@ import (
 // @Param       request body PatchUserDTO true "PatchMe тело запроса"
 // @Security    BearerAuth
 // @Success     200 {object} UserDTOResponse "Успешно изменённый пользователь"
-// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
 // @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
 // @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
 // @Router      /users/me [patch]
 func (h *UsersHTTPHandler) PatchMe(w http.ResponseWriter, r *http.Request) {

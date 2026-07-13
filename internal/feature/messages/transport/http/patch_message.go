@@ -13,6 +13,21 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
+// PatchMessage godoc
+// @Summary     Изменить сообщение
+// @Description Изменить сообщение в чате по ID чата и ID сообщения
+// @Tags        messages
+// @Accept      json
+// @Produce     json
+// @Param       request body PatchMessageDTO       true       "PatchMessage тело запроса"
+// @Security    BearerAuth
+// @Success     200 {object} MessageDTOResponse               "Успешно изменённое сообщение"
+// @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure     401 {object} core_http_response.ErrorResponse "unauthorized"
+// @Failure     403 {object} core_http_response.ErrorResponse "Forbidden"
+// @Failure     404 {object} core_http_response.ErrorResponse "Not found"
+// @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router      /chats/{chat_id}/messages                     [patch]
 func (h *MessagesHTTPHandler) PatchMessage(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)

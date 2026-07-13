@@ -9,7 +9,7 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
-// GetMe   godoc
+// GetMe        godoc
 // @Summary     Получить себя
 // @Description Получить информацию о себе из системы пользователей
 // @Tags        users
