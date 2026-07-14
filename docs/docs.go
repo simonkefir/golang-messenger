@@ -34,7 +34,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Успешно полученные чаты",
                         "schema": {
-                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatDTOResponse"
+                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatListItemDTO"
                         }
                     },
                     "401": {
@@ -144,7 +144,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Успешно полученный чат",
                         "schema": {
-                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatDTOResponse"
+                            "$ref": "#/definitions/internal_feature_chats_transport_http.ChatListItemDTO"
                         }
                     },
                     "401": {
@@ -240,7 +240,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "ID чата",
-                        "name": "id",
+                        "name": "chat_id",
                         "in": "path",
                         "required": true
                     }
@@ -249,7 +249,10 @@ const docTemplate = `{
                     "200": {
                         "description": "Успешно полученные сообщения",
                         "schema": {
-                            "type": "MessageDTOResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/internal_feature_messages_transport_http.MessageDTOResponse"
+                            }
                         }
                     },
                     "400": {
@@ -302,6 +305,13 @@ const docTemplate = `{
                 ],
                 "summary": "Отправить сообщение",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "CreateMessage тело запроса",
                         "name": "request",
@@ -691,12 +701,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/user/{username}": {
+            "get": {
+                "description": "Получить пользователя в системе по username",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Получить пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "username получаемого пользователя",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно полученный пользователь",
+                        "schema": {
+                            "$ref": "#/definitions/internal_feature_users_transport_http.UserDTOResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "Получить пользователя в системе по ID",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -758,16 +812,36 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 333
                 },
-                "participants": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/internal_feature_chats_transport_http.ParticipantDTO"
-                    }
+                "participant": {
+                    "$ref": "#/definitions/internal_feature_chats_transport_http.ParticipantDTO"
+                }
+            }
+        },
+        "internal_feature_chats_transport_http.ChatListItemDTO": {
+            "type": "object",
+            "properties": {
+                "companion_id": {
+                    "type": "integer",
+                    "example": 141
+                },
+                "companion_name": {
+                    "type": "string",
+                    "example": "alex g"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 333
                 }
             }
         },
@@ -778,18 +852,21 @@ const docTemplate = `{
             ],
             "properties": {
                 "participant_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 333
                 }
             }
         },
         "internal_feature_chats_transport_http.ParticipantDTO": {
             "type": "object",
             "properties": {
-                "user_id": {
-                    "type": "integer"
+                "display_name": {
+                    "type": "string",
+                    "example": "alex g"
                 },
-                "username": {
-                    "type": "string"
+                "user_id": {
+                    "type": "integer",
+                    "example": 333
                 }
             }
         },
@@ -802,7 +879,8 @@ const docTemplate = `{
                 "content": {
                     "type": "string",
                     "maxLength": 4000,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "mary is the girl, who i wanna f.."
                 }
             }
         },
@@ -810,19 +888,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "chat_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 3
                 },
                 "content": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "its not what u r, its just what u did, dont hang up the phone, i lov3 u to death, eternal return..."
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 777
                 },
                 "sender_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 333
                 },
                 "sent_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 }
             }
         },
@@ -836,24 +919,34 @@ const docTemplate = `{
                 "content": {
                     "type": "string",
                     "maxLength": 4000,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "mary is the girl, who i wanna kiss"
                 },
                 "id": {
                     "type": "integer",
-                    "minimum": 1
+                    "minimum": 1,
+                    "example": 17174
                 }
             }
         },
         "internal_feature_users_transport_http.CreateUserDTO": {
             "type": "object",
             "required": [
+                "display_name",
                 "email",
                 "password",
                 "username"
             ],
             "properties": {
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "example": "alex g"
+                },
                 "email": {
                     "type": "string",
+                    "maxLength": 100,
                     "example": "alex@mail.com"
                 },
                 "password": {
@@ -863,8 +956,8 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 40,
-                    "minLength": 3,
+                    "maxLength": 30,
+                    "minLength": 1,
                     "example": "alex"
                 }
             }
@@ -881,24 +974,40 @@ const docTemplate = `{
         "internal_feature_users_transport_http.LoginUserDTO": {
             "type": "object",
             "required": [
-                "email",
                 "password"
             ],
             "properties": {
                 "email": {
                     "type": "string",
+                    "maxLength": 100,
                     "example": "alex@mail.com"
                 },
                 "password": {
                     "type": "string",
                     "minLength": 8,
                     "example": "wasd1234"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "example": "alex"
                 }
             }
         },
         "internal_feature_users_transport_http.PatchUserDTO": {
             "type": "object",
             "properties": {
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "example": "alex g"
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "alexg@example.com"
+                },
                 "password": {
                     "type": "string",
                     "minLength": 8,
@@ -906,9 +1015,8 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 40,
-                    "minLength": 3,
-                    "example": "alexg"
+                    "maxLength": 30,
+                    "example": "alex"
                 }
             }
         },
@@ -918,6 +1026,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string",
                     "example": "2006-01-02 15:04:05"
+                },
+                "display_name": {
+                    "type": "string",
+                    "example": "alex g"
                 },
                 "email": {
                     "type": "string",

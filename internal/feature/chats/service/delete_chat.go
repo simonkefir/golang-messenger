@@ -19,9 +19,9 @@ func (s *ChatsService) DeleteChat(ctx context.Context, userID int64, chatID int6
 		return core_errors.ErrForbidden
 	}
 
-	participants, err := s.chatsRepository.GetChatParticipants(ctx, chatID)
+	participant, err := s.chatsRepository.GetChatParticipant(ctx, chatID, userID)
 	if err != nil {
-		return fmt.Errorf("get chat participants: %w", err)
+		return fmt.Errorf("get chat participant: %w", err)
 	}
 
 	if err := s.chatsRepository.DeleteChat(ctx, chatID); err != nil {
@@ -31,16 +31,12 @@ func (s *ChatsService) DeleteChat(ctx context.Context, userID int64, chatID int6
 		return fmt.Errorf("delete chat: %w", err)
 	}
 
-	for _, p := range participants {
-		if p.UserID != userID {
-			s.publisher.Publish(p.UserID, core_websocket.Event{
-				Type: core_websocket.EventChatDeleted,
-				Data: map[string]int64{
-					"chat_id": chatID,
-				},
-			})
-		}
-	}
+	s.publisher.Publish(participant.UserID, core_websocket.Event{
+		Type: core_websocket.EventChatDeleted,
+		Data: map[string]int64{
+			"chat_id": chatID,
+		},
+	})
 
 	return nil
 }

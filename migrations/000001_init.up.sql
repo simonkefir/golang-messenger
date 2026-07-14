@@ -2,7 +2,8 @@ CREATE SCHEMA messenger;
 
 CREATE TABLE messenger.users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(40) NOT NULL UNIQUE,
+    username VARCHAR(30) NOT NULL UNIQUE,
+    display_name VARCHAR(40) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW ()

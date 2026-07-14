@@ -23,16 +23,12 @@ func (s *MessagesService) CreateMessage(ctx context.Context, senderID int64, cha
 		return domain.Message{}, fmt.Errorf("create message: %w", err)
 	}
 
-	participants, err := s.chatsChecker.GetChatParticipants(ctx, chatID)
+	participant, err := s.chatsChecker.GetChatParticipant(ctx, chatID, senderID)
 	if err == nil {
-		for _, p := range participants {
-			if p.UserID != senderID {
-				s.publisher.Publish(p.UserID, core_websocket.Event{
-					Type: core_websocket.EventMessageCreated,
-					Data: msg,
-				})
-			}
-		}
+		s.publisher.Publish(participant.UserID, core_websocket.Event{
+			Type: core_websocket.EventMessageCreated,
+			Data: msg,
+		})
 	}
 
 	return msg, nil

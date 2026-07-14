@@ -15,9 +15,9 @@ import (
 // @Description Получить сообщения из чата по его ID
 // @Tags        messages
 // @Produce     json
-// @Param       id    path   int      true                    "ID чата"
+// @Param       chat_id    path   int      true               "ID чата"
 // @Security    BearerAuth
-// @Success     200 MessageDTOResponse                        "Успешно полученные сообщения"
+// @Success     200 {array}  MessageDTOResponse               "Успешно полученные сообщения"
 // @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
 // @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
 // @Failure     403 {object} core_http_response.ErrorResponse "Forbidden"

@@ -27,14 +27,12 @@ func (s *MessagesService) PatchMessage(ctx context.Context, senderID int64, chat
 		return domain.Message{}, fmt.Errorf("patch message: %w", err)
 	}
 
-	participants, err := s.chatsChecker.GetChatParticipants(ctx, chatID)
+	participant, err := s.chatsChecker.GetChatParticipant(ctx, chatID, senderID)
 	if err == nil {
-		for _, p := range participants {
-			s.publisher.Publish(p.UserID, core_websocket.Event{
-				Type: core_websocket.EventMessageUpdated,
-				Data: patched,
-			})
-		}
+		s.publisher.Publish(participant.UserID, core_websocket.Event{
+			Type: core_websocket.EventMessageUpdated,
+			Data: patched,
+		})
 	}
 
 	return patched, nil

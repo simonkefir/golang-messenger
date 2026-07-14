@@ -19,6 +19,7 @@ import (
 // @Tags           messages
 // @Accept         json
 // @Produce        json
+// @Param          chat_id path int true "ID чата"
 // @Param          request body     CreateMessageDTO     true        "CreateMessage тело запроса"
 // @Security       BearerAuth
 // @Success        201     {object} MessageDTOResponse               "Успешно созданное сообщение"

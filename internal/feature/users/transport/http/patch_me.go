@@ -18,13 +18,13 @@ import (
 // @Tags        users
 // @Accept      json
 // @Produce     json
-// @Param       request body PatchUserDTO true "PatchMe тело запроса"
+// @Param       request body PatchUserDTO true                "PatchMe тело запроса"
 // @Security    BearerAuth
-// @Success     200 {object} UserDTOResponse "Успешно изменённый пользователь"
+// @Success     200 {object} UserDTOResponse                  "Успешно изменённый пользователь"
 // @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
 // @Failure     401 {object} core_http_response.ErrorResponse "Unauthorized"
 // @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
-// @Router      /users/me [patch]
+// @Router      /users/me                                     [patch]
 func (h *UsersHTTPHandler) PatchMe(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
@@ -32,6 +32,11 @@ func (h *UsersHTTPHandler) PatchMe(w http.ResponseWriter, r *http.Request) {
 
 	if err := core_http_request.DecodeJSON(r, &dto); err != nil {
 		responseHandler.ErrorResponse(err, "invalid json")
+		return
+	}
+
+	if dto.Username == nil && dto.DisplayName == nil && dto.Email == nil && dto.Password == nil {
+		responseHandler.ErrorResponse(core_errors.ErrInvalidInput, "no fields to change")
 		return
 	}
 
@@ -53,7 +58,7 @@ func (h *UsersHTTPHandler) PatchMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.svc.PatchMe(r.Context(), userID, dto.Username, dto.Password)
+	user, err := h.svc.PatchMe(r.Context(), userID, dto.Username, dto.DisplayName, dto.Password, dto.Email)
 	if err != nil {
 		responseHandler.ErrorResponse(err, "failed to update user")
 		return

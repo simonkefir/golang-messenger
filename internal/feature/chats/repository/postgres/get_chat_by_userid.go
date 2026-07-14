@@ -9,7 +9,7 @@ import (
 
 func (r *ChatRepository) GetChatsByUserID(ctx context.Context, userID int64) ([]domain.ChatListItem, error) {
 	query := `
-		SELECT c.id, c.created_at, u.id, u.username
+		SELECT c.id, c.created_at, u.id, u.display_name
 		FROM messenger.chats c
 		JOIN messenger.chats_participants cp ON cp.chat_id = c.id
 		JOIN messenger.users u ON u.id = cp.user_id
@@ -29,7 +29,7 @@ func (r *ChatRepository) GetChatsByUserID(ctx context.Context, userID int64) ([]
 	var chats []domain.ChatListItem
 	for rows.Next() {
 		var item domain.ChatListItem
-		if err := rows.Scan(&item.ID, &item.CreatedAt, &item.CompanionID, &item.CompanionName); err != nil {
+		if err := rows.Scan(&item.ID, &item.CreatedAt, &item.CompanionID, &item.CompanionDisplayName); err != nil {
 			return nil, fmt.Errorf("scan chat list item: %w", err)
 		}
 		chats = append(chats, item)

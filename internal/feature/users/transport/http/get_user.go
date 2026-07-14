@@ -9,19 +9,18 @@ import (
 	core_http_response "github.com/simonkefir/golang-messenger/internal/core/transport/http/response"
 )
 
-// GetUser      godoc
+// GetUserByID      godoc
 // @Summary     Получить пользователя
 // @Description Получить пользователя в системе по ID
 // @Tags        users
-// @Accept      json
 // @Produce     json
 // @Param       id path int true "ID получаемого пользователя"
-// @Success     200 {object} UserDTOResponse "Успешно полученный пользователь"
+// @Success     200 {object} UserDTOResponse                  "Успешно полученный пользователь"
 // @Failure     400 {object} core_http_response.ErrorResponse "Invalid input"
 // @Failure     404 {object} core_http_response.ErrorResponse "Not found"
 // @Failure     500 {object} core_http_response.ErrorResponse "Internal server error"
-// @Router      /users/{id} [get]
-func (h *UsersHTTPHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+// @Router      /users/{id}                                   [get]
+func (h *UsersHTTPHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	log := core_logger.FromContext(r.Context())
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
 	idStr := r.PathValue("id")
@@ -31,7 +30,36 @@ func (h *UsersHTTPHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.svc.GetUser(r.Context(), userID)
+	user, err := h.svc.GetUserByID(r.Context(), userID)
+	if err != nil {
+		responseHandler.ErrorResponse(err, "failed to get user")
+		return
+	}
+
+	responseHandler.JSONResponse(NewUserResponseFromDomain(&user), http.StatusOK)
+}
+
+// GetUserByUsername godoc
+// @Summary          Получить пользователя
+// @Description      Получить пользователя в системе по username
+// @Tags             users
+// @Produce          json
+// @Param            username path string true                     "username получаемого пользователя"
+// @Success          200 {object} UserDTOResponse                  "Успешно полученный пользователь"
+// @Failure          400 {object} core_http_response.ErrorResponse "Invalid input"
+// @Failure          404 {object} core_http_response.ErrorResponse "Not found"
+// @Failure          500 {object} core_http_response.ErrorResponse "Internal server error"
+// @Router           /users/user/{username}                        [get]
+func (h *UsersHTTPHandler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
+	log := core_logger.FromContext(r.Context())
+	responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
+	username := r.PathValue("username")
+	if username == "" {
+		responseHandler.ErrorResponse(core_errors.ErrInvalidInput, "invalid username")
+		return
+	}
+
+	user, err := h.svc.GetUserByUsername(r.Context(), username)
 	if err != nil {
 		responseHandler.ErrorResponse(err, "failed to get user")
 		return

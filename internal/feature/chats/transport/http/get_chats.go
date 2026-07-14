@@ -40,10 +40,10 @@ func (h *ChatsHTTPHandler) GetChats(w http.ResponseWriter, r *http.Request) {
 	response := make([]ChatListItemDTO, 0, len(chats))
 	for _, chat := range chats {
 		response = append(response, ChatListItemDTO{
-			ID:            chat.ID,
-			CreatedAt:     chat.CreatedAt.Format("2006-01-02 15:04:05"),
-			CompanionID:   chat.CompanionID,
-			CompanionName: chat.CompanionName,
+			ID:                   chat.ID,
+			CreatedAt:            chat.CreatedAt.Format("2006-01-02 15:04:05"),
+			CompanionID:          chat.CompanionID,
+			CompanionDisplayName: chat.CompanionDisplayName,
 		})
 	}
 

@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *UsersService) PatchMe(ctx context.Context, userID int64, username *string, password *string) (domain.User, error) {
+func (s *UsersService) PatchMe(ctx context.Context, userID int64, username *string, display_name *string, email *string, password *string) (domain.User, error) {
 	var passwordHash *string
 
 	if password != nil {
@@ -23,7 +23,7 @@ func (s *UsersService) PatchMe(ctx context.Context, userID int64, username *stri
 		passwordHash = &hashedStr
 	}
 
-	patched, err := s.usersRepository.PatchMe(ctx, userID, username, passwordHash)
+	patched, err := s.usersRepository.PatchMe(ctx, userID, username, display_name, email, passwordHash)
 	if err != nil {
 		if errors.Is(err, core_errors.ErrAlreadyExists) {
 			return domain.User{}, core_errors.ErrAlreadyExists

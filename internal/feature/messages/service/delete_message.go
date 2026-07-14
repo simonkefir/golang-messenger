@@ -21,18 +21,15 @@ func (s *MessagesService) DeleteMessage(ctx context.Context, senderID int64, cha
 		return fmt.Errorf("delete message: %w", err)
 	}
 
-	participants, err := s.chatsChecker.GetChatParticipants(ctx, chatID)
+	participant, err := s.chatsChecker.GetChatParticipant(ctx, chatID, senderID)
 	if err == nil {
-		for _, p := range participants {
-			s.publisher.Publish(p.UserID, core_websocket.Event{
-				Type: core_websocket.EventMessageDeleted,
-				Data: map[string]int64{
-					"chat_id":    chatID,
-					"message_id": messageID,
-				},
-			})
-		}
+		s.publisher.Publish(participant.UserID, core_websocket.Event{
+			Type: core_websocket.EventMessageDeleted,
+			Data: map[string]int64{
+				"chat_id":    chatID,
+				"message_id": messageID,
+			},
+		})
 	}
-
 	return nil
 }

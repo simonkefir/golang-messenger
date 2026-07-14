@@ -45,7 +45,11 @@ func (h *UsersHTTPHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	token, err := h.svc.Login(r.Context(), dto.Email, dto.Password)
+	if dto.Email == nil && dto.Username == nil {
+		responseHandler.ErrorResponse(core_errors.ErrInvalidInput, "username or email must be not NULL")
+	}
+
+	token, err := h.svc.Login(r.Context(), dto.Email, dto.Username, dto.Password)
 	if err != nil {
 		responseHandler.ErrorResponse(core_errors.ErrUnauthorized, "failed to login")
 		return

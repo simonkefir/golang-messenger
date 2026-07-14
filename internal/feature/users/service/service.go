@@ -23,10 +23,16 @@ type usersRepository interface {
 		ctx context.Context,
 		userID int64,
 	) (domain.User, error)
+	GetUserByUsername(
+		ctx context.Context,
+		username string,
+	) (domain.User, error)
 	PatchMe(
 		ctx context.Context,
 		userID int64,
 		username *string,
+		display_name *string,
+		email *string,
 		password *string,
 	) (domain.User, error)
 	DeleteMe(

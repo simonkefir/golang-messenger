@@ -45,5 +45,5 @@ func (h *ChatsHTTPHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseHandler.JSONResponse(NewChatResponseFromDomain(chat), http.StatusOK)
+	responseHandler.JSONResponse(NewChatResponseFromDomain(chat.Chat, ParticipantDTO(chat.Participant)), http.StatusOK)
 }

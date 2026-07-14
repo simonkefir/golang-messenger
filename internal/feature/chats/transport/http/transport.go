@@ -15,8 +15,8 @@ type ChatsService interface {
 	CreateChat(
 		ctx context.Context,
 		userID int64,
-		chat_participant int64,
-	) (domain.Chat, error)
+		chat_participantID int64,
+	) (domain.ChatWithParticipant, error)
 	DeleteChat(
 		ctx context.Context,
 		userID int64,
@@ -26,7 +26,7 @@ type ChatsService interface {
 		ctx context.Context,
 		userID int64,
 		chatID int64,
-	) (domain.ChatWithParticipants, error)
+	) (domain.ChatWithParticipant, error)
 	GetChats(
 		ctx context.Context,
 		userID int64,

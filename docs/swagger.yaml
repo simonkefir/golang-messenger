@@ -10,31 +10,50 @@ definitions:
   internal_feature_chats_transport_http.ChatDTOResponse:
     properties:
       created_at:
+        example: "2006-01-02 15:04:05"
         type: string
       id:
+        example: 333
         type: integer
-      participants:
-        items:
-          $ref: '#/definitions/internal_feature_chats_transport_http.ParticipantDTO'
-        type: array
+      participant:
+        $ref: '#/definitions/internal_feature_chats_transport_http.ParticipantDTO'
+    type: object
+  internal_feature_chats_transport_http.ChatListItemDTO:
+    properties:
+      companion_id:
+        example: 141
+        type: integer
+      companion_name:
+        example: alex g
+        type: string
+      created_at:
+        example: "2006-01-02 15:04:05"
+        type: string
+      id:
+        example: 333
+        type: integer
     type: object
   internal_feature_chats_transport_http.CreateChatDTO:
     properties:
       participant_id:
+        example: 333
         type: integer
     required:
     - participant_id
     type: object
   internal_feature_chats_transport_http.ParticipantDTO:
     properties:
-      user_id:
-        type: integer
-      username:
+      display_name:
+        example: alex g
         type: string
+      user_id:
+        example: 333
+        type: integer
     type: object
   internal_feature_messages_transport_http.CreateMessageDTO:
     properties:
       content:
+        example: mary is the girl, who i wanna f..
         maxLength: 4000
         minLength: 1
         type: string
@@ -44,23 +63,31 @@ definitions:
   internal_feature_messages_transport_http.MessageDTOResponse:
     properties:
       chat_id:
+        example: 3
         type: integer
       content:
+        example: its not what u r, its just what u did, dont hang up the phone, i
+          lov3 u to death, eternal return...
         type: string
       id:
+        example: 777
         type: integer
       sender_id:
+        example: 333
         type: integer
       sent_at:
+        example: "2006-01-02 15:04:05"
         type: string
     type: object
   internal_feature_messages_transport_http.PatchMessageDTO:
     properties:
       content:
+        example: mary is the girl, who i wanna kiss
         maxLength: 4000
         minLength: 1
         type: string
       id:
+        example: 17174
         minimum: 1
         type: integer
     required:
@@ -69,8 +96,14 @@ definitions:
     type: object
   internal_feature_users_transport_http.CreateUserDTO:
     properties:
+      display_name:
+        example: alex g
+        maxLength: 40
+        minLength: 1
+        type: string
       email:
         example: alex@mail.com
+        maxLength: 100
         type: string
       password:
         example: wasd1234
@@ -78,10 +111,11 @@ definitions:
         type: string
       username:
         example: alex
-        maxLength: 40
-        minLength: 3
+        maxLength: 30
+        minLength: 1
         type: string
     required:
+    - display_name
     - email
     - password
     - username
@@ -96,31 +130,46 @@ definitions:
     properties:
       email:
         example: alex@mail.com
+        maxLength: 100
         type: string
       password:
         example: wasd1234
         minLength: 8
         type: string
+      username:
+        example: alex
+        maxLength: 30
+        minLength: 1
+        type: string
     required:
-    - email
     - password
     type: object
   internal_feature_users_transport_http.PatchUserDTO:
     properties:
+      display_name:
+        example: alex g
+        maxLength: 40
+        type: string
+      email:
+        example: alexg@example.com
+        maxLength: 100
+        type: string
       password:
         example: wasd1212
         minLength: 8
         type: string
       username:
-        example: alexg
-        maxLength: 40
-        minLength: 3
+        example: alex
+        maxLength: 30
         type: string
     type: object
   internal_feature_users_transport_http.UserDTOResponse:
     properties:
       created_at:
         example: "2006-01-02 15:04:05"
+        type: string
+      display_name:
+        example: alex g
         type: string
       email:
         example: alex@mail.com
@@ -148,7 +197,7 @@ paths:
         "200":
           description: Успешно полученные чаты
           schema:
-            $ref: '#/definitions/internal_feature_chats_transport_http.ChatDTOResponse'
+            $ref: '#/definitions/internal_feature_chats_transport_http.ChatListItemDTO'
         "401":
           description: Unauthorized
           schema:
@@ -248,7 +297,7 @@ paths:
         "200":
           description: Успешно полученный чат
           schema:
-            $ref: '#/definitions/internal_feature_chats_transport_http.ChatDTOResponse'
+            $ref: '#/definitions/internal_feature_chats_transport_http.ChatListItemDTO'
         "401":
           description: Unauthorized
           schema:
@@ -306,7 +355,7 @@ paths:
       parameters:
       - description: ID чата
         in: path
-        name: id
+        name: chat_id
         required: true
         type: integer
       produces:
@@ -315,7 +364,9 @@ paths:
         "200":
           description: Успешно полученные сообщения
           schema:
-            type: MessageDTOResponse
+            items:
+              $ref: '#/definitions/internal_feature_messages_transport_http.MessageDTOResponse'
+            type: array
         "400":
           description: Invalid input
           schema:
@@ -389,6 +440,11 @@ paths:
       - application/json
       description: Создать новое сообщение в чате по ID чата
       parameters:
+      - description: ID чата
+        in: path
+        name: chat_id
+        required: true
+        type: integer
       - description: CreateMessage тело запроса
         in: body
         name: request
@@ -421,8 +477,6 @@ paths:
       - messages
   /users/{id}:
     get:
-      consumes:
-      - application/json
       description: Получить пользователя в системе по ID
       parameters:
       - description: ID получаемого пользователя
@@ -602,6 +656,37 @@ paths:
           schema:
             $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
       summary: Создать пользователя
+      tags:
+      - users
+  /users/user/{username}:
+    get:
+      description: Получить пользователя в системе по username
+      parameters:
+      - description: username получаемого пользователя
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно полученный пользователь
+          schema:
+            $ref: '#/definitions/internal_feature_users_transport_http.UserDTOResponse'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_simonkefir_golang-messenger_internal_core_transport_http_response.ErrorResponse'
+      summary: Получить пользователя
       tags:
       - users
 securityDefinitions:

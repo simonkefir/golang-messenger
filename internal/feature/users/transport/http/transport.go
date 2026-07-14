@@ -18,12 +18,17 @@ type UsersService interface {
 	) (domain.User, error)
 	Login(
 		ctx context.Context,
-		email string,
+		email *string,
+		username *string,
 		password string,
 	) (string, error)
-	GetUser(
+	GetUserByID(
 		ctx context.Context,
 		userID int64,
+	) (domain.User, error)
+	GetUserByUsername(
+		ctx context.Context,
+		username string,
 	) (domain.User, error)
 	GetMe(
 		ctx context.Context,
@@ -33,6 +38,8 @@ type UsersService interface {
 		ctx context.Context,
 		userID int64,
 		username *string,
+		display_name *string,
+		email *string,
 		password *string,
 	) (domain.User, error)
 	DeleteMe(
@@ -68,7 +75,12 @@ func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
 		{
 			Method:  http.MethodGet,
 			Path:    "/users/{id}",
-			Handler: h.GetUser,
+			Handler: h.GetUserByID,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/users/user/{username}",
+			Handler: h.GetUserByUsername,
 		},
 		{
 			Method:     http.MethodGet,

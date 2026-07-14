@@ -22,7 +22,7 @@ type chatsRepository interface {
 		ctx context.Context,
 		user1 int64,
 		user2 int64,
-	) (domain.Chat, error)
+	) (domain.ChatWithParticipant, error)
 	IsParticipant(
 		ctx context.Context,
 		userID int64,
@@ -32,18 +32,20 @@ type chatsRepository interface {
 		ctx context.Context,
 		chatID int64,
 	) error
-	GetChatByChatID(
+	GetChatByID(
 		ctx context.Context,
 		chatID int64,
-	) (domain.Chat, error)
+		excludeUserID int64,
+	) (domain.ChatWithParticipant, error)
 	GetChatsByUserID(
 		ctx context.Context,
 		userID int64,
 	) ([]domain.ChatListItem, error)
-	GetChatParticipants(
+	GetChatParticipant(
 		ctx context.Context,
 		chatID int64,
-	) ([]domain.ChatParticipant, error)
+		excludeUserID int64,
+	) (domain.ChatParticipant, error)
 }
 
 func NewChatsService(

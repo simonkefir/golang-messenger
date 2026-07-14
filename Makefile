@@ -55,8 +55,26 @@ migrate-action:
 		"$(action)"
 
 messenger-run:
-	@go run ${PROJECT_ROOT}/cmd/messenger/main.go
+	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	export POSTGRES_HOST=localhost && \
+	go mod tidy && \
+	go run ${PROJECT_ROOT}/cmd/messenger/main.go
 
+logs-cleanup:
+	@read -p "Очистить все log файлы окружения? Опасность утери логов. [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		rm -rf ${PROJECT_ROOT}/out/logs && \
+		echo "Файлы логов очищены"; \
+	else \
+		echo "Очистка логов отменена"; \
+	fi
+
+messenger-deploy:
+	@docker compose up -d --build messenger
+
+messenger-undeploy:
+	@docker compose down messenger
+	
 swagger-gen:
 	@docker compose run --rm swagger \
 		init \

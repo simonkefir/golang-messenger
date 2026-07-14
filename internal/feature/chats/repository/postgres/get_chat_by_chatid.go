@@ -4,29 +4,34 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
 	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
 )
 
-func (r *ChatRepository) GetChatByChatID(ctx context.Context, chatID int64) (domain.Chat, error) {
+func (r *ChatRepository) GetChatByID(ctx context.Context, chatID int64, userID int64) (domain.ChatWithParticipant, error) {
 	query := `
-		SELECT id, created_at
-		FROM messenger.chats
-		WHERE id = $1
+		SELECT c.id, c.created_at, u.id, u.display_name
+		FROM messenger.chats c
+		JOIN messenger.chats_participants cp ON cp.chat_id = c.id
+		JOIN messenger.users u ON u.id = cp.user_id
+		WHERE c.id = $1 AND u.id != $2
 	`
 
-	var chat domain.Chat
-	err := r.db.QueryRowContext(ctx, query, chatID).Scan(
+	var chat domain.ChatWithParticipant
+	err := r.db.QueryRowContext(ctx, query, chatID, userID).Scan(
 		&chat.ID,
 		&chat.CreatedAt,
+		&chat.Participant.UserID,
+		&chat.Participant.DisplayName,
 	)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Chat{}, core_errors.ErrNotFound
+			return domain.ChatWithParticipant{}, core_errors.ErrNotFound
 		}
-		return domain.Chat{}, err
+		return domain.ChatWithParticipant{}, fmt.Errorf("get chat by id: %w", err)
 	}
 
 	return chat, nil

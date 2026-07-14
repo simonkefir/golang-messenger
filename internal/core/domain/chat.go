@@ -8,17 +8,17 @@ type Chat struct {
 }
 
 type ChatParticipant struct {
-	UserID   int64
-	Username string
+	UserID      int64
+	DisplayName string
 }
 
-type ChatWithParticipants struct {
+type ChatWithParticipant struct {
 	Chat
-	Participants []ChatParticipant
+	Participant ChatParticipant
 }
 
 type ChatListItem struct {
 	Chat
-	CompanionID   int64
-	CompanionName string
+	CompanionID          int64
+	CompanionDisplayName string
 }

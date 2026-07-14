@@ -43,10 +43,11 @@ type chatsChecker interface {
 		chatID int64,
 		userID int64,
 	) (bool, error)
-	GetChatParticipants(
+	GetChatParticipant(
 		ctx context.Context,
 		chatID int64,
-	) ([]domain.ChatParticipant, error)
+		excludeUserID int64,
+	) (domain.ChatParticipant, error)
 }
 
 func NewMessagesService(
