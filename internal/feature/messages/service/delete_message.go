@@ -25,9 +25,9 @@ func (s *MessagesService) DeleteMessage(ctx context.Context, senderID int64, cha
 	if err == nil {
 		s.publisher.Publish(participant.UserID, core_websocket.Event{
 			Type: core_websocket.EventMessageDeleted,
-			Data: map[string]int64{
-				"chat_id":    chatID,
-				"message_id": messageID,
+			Data: core_websocket.MessageDeletedPayload{
+				ChatID:    chatID,
+				MessageID: messageID,
 			},
 		})
 	}

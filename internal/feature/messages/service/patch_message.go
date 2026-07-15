@@ -19,7 +19,7 @@ func (s *MessagesService) PatchMessage(ctx context.Context, senderID int64, chat
 		return domain.Message{}, core_errors.ErrForbidden
 	}
 
-	patched, err := s.messagesRepository.PatchMessage(ctx, chatID, messageID, content)
+	patched, err := s.messagesRepository.PatchMessage(ctx, messageID, senderID, content)
 	if err != nil {
 		if errors.Is(err, core_errors.ErrAlreadyExists) {
 			return domain.Message{}, core_errors.ErrAlreadyExists
@@ -31,7 +31,13 @@ func (s *MessagesService) PatchMessage(ctx context.Context, senderID int64, chat
 	if err == nil {
 		s.publisher.Publish(participant.UserID, core_websocket.Event{
 			Type: core_websocket.EventMessageUpdated,
-			Data: patched,
+			Data: core_websocket.MessagePayload{
+				ID:       patched.ID,
+				ChatID:   patched.ChatID,
+				SenderID: patched.SenderID,
+				Content:  patched.Content,
+				SentAt:   patched.SentAt.Format("2006-01-02 15:04:05"),
+			},
 		})
 	}
 

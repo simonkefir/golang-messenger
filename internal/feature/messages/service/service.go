@@ -31,8 +31,8 @@ type messagesRepository interface {
 	) error
 	PatchMessage(
 		ctx context.Context,
-		chatID int64,
 		messageID int64,
+		senderID int64,
 		content string,
 	) (domain.Message, error)
 }

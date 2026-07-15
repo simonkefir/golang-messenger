@@ -27,7 +27,13 @@ func (s *MessagesService) CreateMessage(ctx context.Context, senderID int64, cha
 	if err == nil {
 		s.publisher.Publish(participant.UserID, core_websocket.Event{
 			Type: core_websocket.EventMessageCreated,
-			Data: msg,
+			Data: core_websocket.MessagePayload{
+				ID:       msg.ID,
+				ChatID:   msg.ChatID,
+				SenderID: msg.SenderID,
+				Content:  msg.Content,
+				SentAt:   msg.SentAt.Format("2006-01-02 15:04:05"),
+			},
 		})
 	}
 

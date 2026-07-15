@@ -25,7 +25,7 @@ func (r *MsgRepository) PatchMessage(ctx context.Context, messageID int64, sende
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return domain.Message{}, core_errors.ErrForbidden // либо ErrNotFound
+			return domain.Message{}, core_errors.ErrForbidden
 		}
 		return domain.Message{}, fmt.Errorf("update message: %w", err)
 	}

@@ -33,8 +33,8 @@ func (s *ChatsService) DeleteChat(ctx context.Context, userID int64, chatID int6
 
 	s.publisher.Publish(participant.UserID, core_websocket.Event{
 		Type: core_websocket.EventChatDeleted,
-		Data: map[string]int64{
-			"chat_id": chatID,
+		Data: core_websocket.ChatDeletedPayload{
+			ChatID: chatID,
 		},
 	})
 

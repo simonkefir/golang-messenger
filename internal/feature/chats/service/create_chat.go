@@ -35,7 +35,11 @@ func (s *ChatsService) CreateChat(ctx context.Context, userID int64, chat_partic
 
 	s.publisher.Publish(chat_participant, core_websocket.Event{
 		Type: core_websocket.EventChatCreated,
-		Data: chat,
+		Data: core_websocket.ChatPayload{
+			ID:          chat.ID,
+			CreatedAt:   chat.CreatedAt.Format("2006-01-02 15:04:05"),
+			CompanionID: userID,
+		},
 	})
 
 	return domain.ChatWithParticipant{Chat: chat, Participant: participant}, nil
