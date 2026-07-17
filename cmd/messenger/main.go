@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +13,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/simonkefir/golang-messenger/docs"
 	core_logger "github.com/simonkefir/golang-messenger/internal/core/logger"
+	core_pgx_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/simonkefir/golang-messenger/internal/core/transport/http/middleware"
 	core_http_server "github.com/simonkefir/golang-messenger/internal/core/transport/http/server"
 	core_websocket "github.com/simonkefir/golang-messenger/internal/core/websocket"
@@ -44,6 +44,12 @@ func main() {
 	setTimezone()
 	validateJWTEnv()
 
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT, syscall.SIGTERM,
+	)
+	defer cancel()
+
 	logCfg, err := core_logger.NewConfig()
 	if err != nil {
 		log.Fatalf("logger config: %v", err)
@@ -57,36 +63,32 @@ func main() {
 
 	logger.Debug("application time zone", zap.Any("zone", time.Local))
 
-	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
+	pool, err := core_pgx_pool.NewPool(
+		ctx,
+		core_pgx_pool.NewConfigMust(),
+	)
 	if err != nil {
-		logger.Fatal("db open", zap.Error(err))
-	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		logger.Fatal("db ping", zap.Error(err))
+		logger.Fatal("failed to init postgres connection pool", zap.Error(err))
 	}
 
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
+	defer pool.Close()
 
 	hub := core_websocket.NewHub(logger)
 	publisher := core_websocket.NewWSPublisher(hub)
 	wsHandler := core_websocket.NewHandler(hub)
 
 	logger.Debug("initializing feature", zap.String("feature", "users"))
-	userRepo := users_repository_postgres.NewUserRepository(db)
+	userRepo := users_repository_postgres.NewUserRepository(pool)
 	userService := users_service.NewUsersService(userRepo)
 	userHandler := users_transport_http.NewUsersHTTPHandler(userService)
 
 	logger.Debug("initializing feature", zap.String("feature", "chats"))
-	chatRepo := chats_repository_postgres.NewChatRepository(db)
+	chatRepo := chats_repository_postgres.NewChatRepository(pool)
 	chatService := chats_service.NewChatsService(chatRepo, publisher)
 	chatHandler := chats_transport_http.NewChatsHTTPHandler(chatService, publisher)
 
 	logger.Debug("initializing feature", zap.String("feature", "messages"))
-	msgRepo := messages_repository_postgres.NewMsgRepository(db)
+	msgRepo := messages_repository_postgres.NewMsgRepository(pool)
 	msgService := messages_service.NewMessagesService(msgRepo, chatRepo, publisher)
 	msgHandler := messages_transport_http.NewMessagesHTTPHandler(msgService, publisher)
 
@@ -119,18 +121,6 @@ func main() {
 	srv := core_http_server.NewHTTPServer(cfg)
 	srv.RegisterAPIRouters(v1)
 	srv.RegisterSwagger()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		<-quit
-		logger.Info("shutting down...")
-		cancel()
-	}()
 
 	if err := srv.Run(ctx); err != nil {
 		logger.Fatal("server", zap.Error(err))

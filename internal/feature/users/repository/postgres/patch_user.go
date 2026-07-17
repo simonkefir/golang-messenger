@@ -2,16 +2,19 @@ package users_repository_postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
 	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
+	core_postgres_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool"
 )
 
-func (r *UserRepository) PatchMe(ctx context.Context, userID int64, username, displayName, email, password *string) (domain.User, error) {
+func (r *UserRepository) PatchUser(ctx context.Context, userID int64, username, displayName, email, password *string) (domain.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	setClauses := []string{}
 	args := []interface{}{}
 	argIdx := 1
@@ -43,25 +46,35 @@ func (r *UserRepository) PatchMe(ctx context.Context, userID int64, username, di
 
 	query := fmt.Sprintf(`
         UPDATE messenger.users
-        SET %s, version = version + 1
+        SET %s
         WHERE id = $%d
         RETURNING id, username, display_name, email, password_hash, created_at
     `, strings.Join(setClauses, ", "), argIdx)
 	args = append(args, userID)
 
 	var user domain.User
-	err := r.db.QueryRowContext(ctx, query, args...).Scan(
-		&user.ID, &user.Username, &user.DisplayName, &user.Email, &user.PasswordHash, &user.CreatedAt,
+	row := r.pool.QueryRow(
+		ctx,
+		query,
+		args...,
 	)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.User{}, core_errors.ErrNotFound
-		}
-		if isPgUniqueViolation(err) {
-			return domain.User{}, core_errors.ErrAlreadyExists
+	if err := row.Scan(
+		&user.ID,
+		&user.Username,
+		&user.DisplayName,
+		&user.Email,
+		&user.PasswordHash,
+		&user.CreatedAt,
+	); err != nil {
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
+			return domain.User{}, fmt.Errorf(
+				"user with id='%d' concurrently accessed: %w",
+				userID,
+				core_errors.ErrAlreadyExists,
+			)
 		}
 
-		return domain.User{}, fmt.Errorf("update user: %w", err)
+		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
 
 	return user, nil

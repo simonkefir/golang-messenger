@@ -1,24 +1,15 @@
 package users_repository_postgres
 
 import (
-	"database/sql"
-	"errors"
+	core_postgres_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool"
 )
 
 type UserRepository struct {
-	db *sql.DB
+	pool core_postgres_pool.Pool
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
+func NewUserRepository(pool core_postgres_pool.Pool) *UserRepository {
 	return &UserRepository{
-		db: db,
+		pool: pool,
 	}
-}
-
-func isPgUniqueViolation(err error) bool {
-	var pgErr interface{ SQLState() string }
-	if errors.As(err, &pgErr) {
-		return pgErr.SQLState() == "23505"
-	}
-	return false
 }

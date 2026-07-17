@@ -8,6 +8,9 @@ import (
 )
 
 func (r *ChatRepository) GetChatParticipant(ctx context.Context, chatID int64, excludeUserID int64) (domain.ChatParticipant, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	query := `
 		SELECT u.id, u.username
 		FROM messenger.chats_participants cp
@@ -15,11 +18,17 @@ func (r *ChatRepository) GetChatParticipant(ctx context.Context, chatID int64, e
 		WHERE cp.chat_id = $1 AND u.id != $2
 	`
 
-	var p domain.ChatParticipant
-	err := r.db.QueryRowContext(ctx, query, chatID, excludeUserID).Scan(&p.UserID, &p.DisplayName)
-	if err != nil {
+	var participant domain.ChatParticipant
+	row := r.pool.QueryRow(
+		ctx,
+		query,
+		chatID,
+		excludeUserID,
+	)
+
+	if err := row.Scan(&participant.UserID, &participant.DisplayName); err != nil {
 		return domain.ChatParticipant{}, fmt.Errorf("get chat participant: %w", err)
 	}
 
-	return p, nil
+	return participant, nil
 }

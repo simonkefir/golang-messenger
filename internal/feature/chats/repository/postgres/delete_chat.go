@@ -4,24 +4,22 @@ import (
 	"context"
 	"fmt"
 
-	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
+	core_postgres_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool"
 )
 
 func (r *ChatRepository) DeleteChat(ctx context.Context, chatID int64) error {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	query := `DELETE FROM messenger.chats WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, chatID)
+	result, err := r.pool.Exec(ctx, query, chatID)
 	if err != nil {
 		return fmt.Errorf("delete chat: %w", err)
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return core_errors.ErrNotFound
+	if result.RowsAffected() == 0 {
+		return core_postgres_pool.ErrNoRows
 	}
 
 	return nil

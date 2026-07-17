@@ -1,24 +1,15 @@
 package messages_repository_postgres
 
 import (
-	"database/sql"
-	"errors"
+	core_postgres_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool"
 )
 
 type MsgRepository struct {
-	db *sql.DB
+	pool core_postgres_pool.Pool
 }
 
-func NewMsgRepository(db *sql.DB) *MsgRepository {
+func NewMsgRepository(pool core_postgres_pool.Pool) *MsgRepository {
 	return &MsgRepository{
-		db: db,
+		pool: pool,
 	}
-}
-
-func isPgUniqueViolation(err error) bool {
-	var pgErr interface{ SQLState() string }
-	if errors.As(err, &pgErr) {
-		return pgErr.SQLState() == "23505"
-	}
-	return false
 }

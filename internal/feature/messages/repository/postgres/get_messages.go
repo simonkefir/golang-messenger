@@ -8,6 +8,9 @@ import (
 )
 
 func (r *MsgRepository) GetChatMessages(ctx context.Context, chatID int64) ([]domain.Message, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	query := `
 		SELECT id, chat_id, sender_id, message, sent_at
 		FROM messenger.messages
@@ -15,7 +18,7 @@ func (r *MsgRepository) GetChatMessages(ctx context.Context, chatID int64) ([]do
 		ORDER BY sent_at ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, chatID)
+	rows, err := r.pool.Query(ctx, query, chatID)
 	if err != nil {
 		return nil, fmt.Errorf("get chat messages: %w", err)
 	}

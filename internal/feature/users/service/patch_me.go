@@ -23,7 +23,7 @@ func (s *UsersService) PatchMe(ctx context.Context, userID int64, username *stri
 		passwordHash = &hashedStr
 	}
 
-	patched, err := s.usersRepository.PatchMe(ctx, userID, username, display_name, email, passwordHash)
+	patched, err := s.usersRepository.PatchUser(ctx, userID, username, display_name, email, passwordHash)
 	if err != nil {
 		if errors.Is(err, core_errors.ErrAlreadyExists) {
 			return domain.User{}, core_errors.ErrAlreadyExists

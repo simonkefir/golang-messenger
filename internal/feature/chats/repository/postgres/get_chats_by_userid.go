@@ -8,6 +8,9 @@ import (
 )
 
 func (r *ChatRepository) GetChatsByUserID(ctx context.Context, userID int64) ([]domain.ChatListItem, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	query := `
 		SELECT c.id, c.created_at, u.id, u.display_name
 		FROM messenger.chats c
@@ -20,7 +23,7 @@ func (r *ChatRepository) GetChatsByUserID(ctx context.Context, userID int64) ([]
 		ORDER BY c.created_at DESC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, userID)
+	rows, err := r.pool.Query(ctx, query, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get chats by user id: %w", err)
 	}
