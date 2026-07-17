@@ -9,7 +9,7 @@ import (
 )
 
 func (s *UsersService) DeleteMe(ctx context.Context, userID int64) error {
-	if err := s.usersRepository.DeleteMe(ctx, userID); err != nil {
+	if err := s.usersRepository.DeleteUser(ctx, userID); err != nil {
 		if errors.Is(err, core_errors.ErrNotFound) {
 			return fmt.Errorf("delete user by id: %w", err)
 		}

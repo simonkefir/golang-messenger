@@ -1,15 +1,13 @@
 package chats_repository_postgres
 
-import (
-	"database/sql"
-)
+import core_postgres_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool"
 
 type ChatRepository struct {
-	db *sql.DB
+	pool core_postgres_pool.Pool
 }
 
-func NewChatRepository(db *sql.DB) *ChatRepository {
+func NewChatRepository(pool core_postgres_pool.Pool) *ChatRepository {
 	return &ChatRepository{
-		db: db,
+		pool: pool,
 	}
 }

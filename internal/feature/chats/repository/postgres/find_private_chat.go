@@ -2,15 +2,18 @@ package chats_repository_postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 
 	"github.com/simonkefir/golang-messenger/internal/core/domain"
 	core_errors "github.com/simonkefir/golang-messenger/internal/core/errors"
+	core_postgres_pool "github.com/simonkefir/golang-messenger/internal/core/repository/postgres/pool"
 )
 
 func (r *ChatRepository) FindPrivateChat(ctx context.Context, user1, user2 int64) (domain.ChatWithParticipant, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	query := `
 	SELECT c.id, c.created_at
 	FROM messenger.chats c
@@ -21,9 +24,9 @@ func (r *ChatRepository) FindPrivateChat(ctx context.Context, user1, user2 int64
 	`
 
 	var chat domain.ChatWithParticipant
-	err := r.db.QueryRowContext(ctx, query, user1, user2).Scan(&chat.ID, &chat.CreatedAt)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+	rows := r.pool.QueryRow(ctx, query, user1, user2)
+	if err := rows.Scan(&chat.ID, &chat.CreatedAt); err != nil {
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.ChatWithParticipant{}, core_errors.ErrNotFound
 		}
 		return domain.ChatWithParticipant{}, fmt.Errorf("find private chat: %w", err)

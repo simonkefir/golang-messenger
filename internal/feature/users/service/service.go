@@ -27,7 +27,7 @@ type usersRepository interface {
 		ctx context.Context,
 		username string,
 	) (domain.User, error)
-	PatchMe(
+	PatchUser(
 		ctx context.Context,
 		userID int64,
 		username *string,
@@ -35,7 +35,7 @@ type usersRepository interface {
 		email *string,
 		password *string,
 	) (domain.User, error)
-	DeleteMe(
+	DeleteUser(
 		ctx context.Context,
 		userID int64,
 	) error

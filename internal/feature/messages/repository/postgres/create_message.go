@@ -8,6 +8,9 @@ import (
 )
 
 func (r *MsgRepository) CreateMessage(ctx context.Context, senderID int64, chatID int64, content string) (domain.Message, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeOut())
+	defer cancel()
+
 	query := `
 		INSERT INTO messenger.messages (chat_id, sender_id, message)
 		VALUES ($1, $2, $3)
@@ -15,15 +18,15 @@ func (r *MsgRepository) CreateMessage(ctx context.Context, senderID int64, chatI
 	`
 
 	var msg domain.Message
-	err := r.db.QueryRowContext(ctx, query, chatID, senderID, content).Scan(
+
+	row := r.pool.QueryRow(ctx, query, chatID, senderID, content)
+	if err := row.Scan(
 		&msg.ID,
 		&msg.ChatID,
 		&msg.SenderID,
 		&msg.Content,
 		&msg.SentAt,
-	)
-
-	if err != nil {
+	); err != nil {
 		return domain.Message{}, fmt.Errorf("create message: %w", err)
 	}
 
